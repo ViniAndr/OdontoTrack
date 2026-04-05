@@ -7,7 +7,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "profissionais")
@@ -28,11 +30,14 @@ public class Profissional {
 
     private String registroProfissional; // Ex: CRO
 
+    // Sistema de Permissões de Acesso
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "profissional_perfis", joinColumns = @JoinColumn(name = "profissional_id"))
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Cargo cargo;
+    @Column(name = "perfil")
+    private Set<Perfil> perfis = new HashSet<>();
 
-    // Lista de especialidades
+    // Especialidades Odontológicas (Ortodontia, etc)
     @ElementCollection
     @CollectionTable(name = "profissional_especialidades", joinColumns = @JoinColumn(name = "profissional_id"))
     @Column(name = "especialidade")
@@ -46,6 +51,10 @@ public class Profissional {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @NotBlank
+    @Column(nullable = false)
+    private String senha;
+
     // --- CAMPOS DE AUDITORIA ---
 
     @CreationTimestamp
@@ -55,7 +64,7 @@ public class Profissional {
     @UpdateTimestamp
     private LocalDateTime dataAtualizacao;
 
-    private LocalDateTime dataDeletado; // Se for null, o usuário está ativo
+    private LocalDateTime dataDeletado;
 
     private Boolean ativo = true;
 }
