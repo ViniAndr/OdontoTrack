@@ -16,4 +16,8 @@ public interface ProfissionalRepository extends JpaRepository<Profissional, Long
 
     Optional<Profissional> findByEmail(String email);
 
+    boolean existsByCpf(String cpf);
+
+    boolean existsByEmail(String email);
+
 }
