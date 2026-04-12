@@ -3,18 +3,26 @@ package com.odontotrack.api.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "profissionais")
-@Data
-public class Profissional {
+@Getter
+@Setter
+public class Profissional implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,4 +75,50 @@ public class Profissional {
     private LocalDateTime dataDeletado;
 
     private Boolean ativo = true;
+
+
+
+    // Ensina o Spring a ler os nossos Cargos (ROLE_ADMIN, ROLE_DENTISTA)
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.perfis.stream()
+                .map(perfil -> new SimpleGrantedAuthority(perfil.name()))
+                .collect(Collectors.toList());
+    }
+
+    // Ensina o Spring onde está a senha criptografada
+    @Override
+    public String getPassword() {
+        return this.senha;
+    }
+
+    // Ensina o Spring que o nosso "Username" na verdade é o E-mail
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    // Conta não expirada?
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Vamos simplificar e dizer que as contas nunca expiram
+    }
+
+    // Conta não bloqueada?
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    // Credenciais não expiradas?
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    // Usuário está ativo? (Aqui usamos o nosso próprio campo 'ativo')
+    @Override
+    public boolean isEnabled() {
+        return this.ativo;
+    }
 }

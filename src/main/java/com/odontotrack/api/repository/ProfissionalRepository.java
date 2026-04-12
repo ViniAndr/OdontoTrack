@@ -14,4 +14,6 @@ public interface ProfissionalRepository extends JpaRepository<Profissional, Long
 
     List<Profissional> findAllByAtivoTrue();
 
+    Optional<Profissional> findByEmail(String email);
+
 }
