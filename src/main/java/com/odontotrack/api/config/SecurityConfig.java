@@ -1,27 +1,42 @@
 package com.odontotrack.api.config;
 
+import com.odontotrack.api.security.SecurityFilter; // Import novo
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // Import novo
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy; // Import novo
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // Import novo
 
 @Configuration
 public class SecurityConfig {
 
+    // Injetamos o nosso filtro recém-criado aqui
+    @Autowired
+    private SecurityFilter securityFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Desliga a proteção CSRF (que bloqueia requisições POST no Postman)
                 .csrf(csrf -> csrf.disable())
+                // Avisa que não vamos usar cookies/sessões na memória, e sim Tokens (Stateless)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 2. Libera TODAS as rotas sem precisar de login e senha
+                // DEFININDO AS REGRAS DA PORTA:
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                );
+                        // Deixa qualquer um fazer login
+                        .requestMatchers(HttpMethod.POST, "/profissionais/login").permitAll()
+                        // Exige que qualquer outra requisição tenha o passe VIP
+                        .anyRequest().authenticated()
+                )
+                // o Leão de Chácara atua ANTES do filtro padrão do Spring
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
