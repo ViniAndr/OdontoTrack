@@ -25,26 +25,33 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // 1. Pega o token do cabeçalho da requisição (se existir)
+        // Pega o token do cabeçalho da requisição (se existir)
         var token = this.recuperarToken(request);
 
-        // 2. Tenta validar o token e extrair o e-mail (subject)
+        if (token == null && !request.getRequestURI().contains("/login")) {
+            // Escrevemos a mensagem de erro diretamente na resposta do servidor!
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // Status 403
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("Acesso bloqueado: Nenhum Token JWT foi enviado no cabeçalho.");
+            return; // Corta a requisição aqui, nem tenta continuar!
+        }
+
+        // Tenta validar o token e extrair o e-mail
         var email = tokenService.validarToken(token);
 
         if (email != null && !email.isEmpty()) {
-            // 3. Se o token for válido, vai no banco buscar o Profissional
+            // Se o token for válido, vai no banco buscar o Profissional
             Profissional profissional = repository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Profissional não encontrado no banco"));
 
-            // 4. Cria o passe VIP. Olha como ficou mais simples!
             // O próprio profissional já entrega as "authorities" (ROLE_ADMIN, etc) dele.
             var authentication = new UsernamePasswordAuthenticationToken(profissional, null, profissional.getAuthorities());
 
-            // 5. Avisa ao Spring: "Esse cara está logado nesta requisição"
+            // Avisa ao Spring: "Esse cara está logado nesta requisição"
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
-        // 6. Manda a requisição seguir o fluxo (ir para o Controller ou ser bloqueada)
+        // Manda a requisição seguir o fluxo (ir para o Controller ou ser bloqueada)
         filterChain.doFilter(request, response);
     }
 
