@@ -6,6 +6,8 @@ import com.odontotrack.api.service.ProfissionalService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,13 @@ public class ProfissionalController {
     @Autowired
     private ProfissionalService service;
 
+    // Injetar o Gerente de Segurança do Spring
+    @Autowired
+    private AuthenticationManager manager;
+
+    @Autowired
+    private com.odontotrack.api.security.TokenService tokenService;
+
     // ROTA: Listar todos os profissionais (GET)
     @GetMapping
     public ResponseEntity<List<Profissional>> listarTodos() {
@@ -26,10 +35,21 @@ public class ProfissionalController {
 
     // ROTA: Fazer o Login (POST)
     @PostMapping("/login")
-    public ResponseEntity<Profissional> login(@RequestBody @Valid LoginDTO dadosLogin) {
-        // Manda o Service verificar se o email e senha batem
-        Profissional profissionalLogado = service.autenticar(dadosLogin.email(), dadosLogin.senha());
+    public ResponseEntity<String> login(@RequestBody @Valid LoginDTO dadosLogin) {
+        // um "token" temporário só com email e senha para o Spring Security analisar
+        var authenticationToken = new UsernamePasswordAuthenticationToken(dadosLogin.email(), dadosLogin.senha());
 
-        return ResponseEntity.ok(profissionalLogado);
+        // O manager vai automaticamente usar o AutenticacaoService para buscar no banco
+        // e usar o BCrypt para comparar a senha. Se errar a senha, ele já barra aqui!
+        var authentication = manager.authenticate(authenticationToken);
+
+        // pegamos o usuário que o Manager logou na memória
+        Profissional usuarioLogado = (Profissional) authentication.getPrincipal();
+
+        // E mandamos fabricar o crachá!
+        String tokenJWT = tokenService.gerarToken(usuarioLogado);
+
+        // Devolve o crachá (Token) pro Front-end!
+        return ResponseEntity.ok(tokenJWT);
     }
 }

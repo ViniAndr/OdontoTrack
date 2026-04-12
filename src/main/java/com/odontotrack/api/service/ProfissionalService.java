@@ -14,26 +14,6 @@ public class ProfissionalService {
     @Autowired
     private ProfissionalRepository repository;
 
-    // --- MÉTODO DE LOGIN ---
-    public Profissional autenticar(String email, String senha) {
-        // Tenta buscar o profissional pelo e-mail
-        Profissional profissional = repository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("E-mail não encontrado."));
-
-        // Verifica se ele está ativo
-        if (!profissional.getAtivo()) {
-            throw new RuntimeException("Este usuário está desativado.");
-        }
-
-        // Compara a senha
-        if (!profissional.getSenha().equals(senha)) {
-            throw new RuntimeException("Senha incorreta.");
-        }
-
-        return profissional;
-    }
-
-
     public Profissional salvar(Profissional profissional) {
         if (repository.findByCpf(profissional.getCpf()).isPresent()) {
             throw new RuntimeException("Já existe um profissional cadastrado com este CPF.");
