@@ -1,4 +1,4 @@
-package com.odontotrack.api.model.PacientesDTO;
+package com.odontotrack.api.dto.PacientesDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +11,7 @@ public record DadosDetalhamentoPacienteDTO(
         String cpf,
         String telefone,
         String email,
+        String endereco,
         LocalDate dataNascimento,
         LocalDateTime dataCadastro
 ) {
@@ -21,6 +22,7 @@ public record DadosDetalhamentoPacienteDTO(
                 paciente.getCpf(),
                 paciente.getTelefone(),
                 paciente.getEmail(),
+                paciente.getEndereco(),
                 paciente.getDataNascimento(),
                 paciente.getDataCadastro()
         );
