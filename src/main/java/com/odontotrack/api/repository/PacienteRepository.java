@@ -11,9 +11,9 @@ import com.odontotrack.api.model.Paciente;
 @Repository
 public interface PacienteRepository extends JpaRepository<Paciente, Long> {
 
-    Optional<Paciente> findByCpf(String cpf);
-
     List<Paciente> findAllByAtivoTrue();
+
+    Optional<Paciente> findByCpf(String cpf);
 
     Optional<Paciente> findByEmail(String email);
 

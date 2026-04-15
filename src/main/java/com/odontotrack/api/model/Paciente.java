@@ -35,7 +35,7 @@ public class Paciente {
     private String cpf;
 
     @NotBlank
-    @Column(nullable = false, length = 11)
+    @Column(nullable = false, length = 14)
     private String telefone;
 
     @NotBlank
@@ -53,5 +53,8 @@ public class Paciente {
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime dataCadastro;
+
+    @Column(nullable = false)
+    private Boolean ativo = true;
 
 }
