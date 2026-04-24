@@ -26,6 +26,15 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("api-odontotrack") // Mudei o nome do emissor
                     .withSubject(profissional.getEmail()) // Aqui usamos o e-mail
+                    .withClaim("id", profissional.getId())
+                    .withClaim("nome", profissional.getNome())
+                    .withClaim(
+                            "perfis",
+                            profissional.getPerfis()
+                                    .stream()
+                                    .map(Enum::name)
+                                    .toList()
+                    )
                     .withExpiresAt(this.gerarExpiracaoJWT())
                     .sign(algorithm);
         }catch (JWTCreationException exception){
