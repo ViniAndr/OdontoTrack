@@ -2,12 +2,13 @@ package com.odontotrack.api.service;
 
 import java.util.List;
 
+import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.ResumoAgendamentosDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
-import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
 import com.odontotrack.api.model.AgendamentoConsulta;
 import com.odontotrack.api.model.StatusConsulta;
 import com.odontotrack.api.repository.AgendamentoRepository;
@@ -36,7 +37,7 @@ public class AgendamentoService {
     }
 
     public List<AgendamentoConsulta> listarPorPaciente(Long pacienteId) {
-        return repository.findAllByPacienteId(pacienteId);
+        return repository.findAllByPacienteIdOrderByDataInicioDesc(pacienteId);
     }
 
     public List<AgendamentoConsulta> listarPorProfissional(Long profissionalId) {
@@ -45,6 +46,15 @@ public class AgendamentoService {
 
     public List<AgendamentoConsulta> listarPorStatus(StatusConsulta status) {
         return repository.findAllByStatusConsulta(status);
+    }
+
+    public ResumoAgendamentosDTO obterResumoMinhasConsultas(Long profissionalId) {
+        long agendados = repository.countByProfissionalIdAndStatusConsulta(profissionalId, StatusConsulta.AGENDADO);
+        long pendentes = repository.countByProfissionalIdAndStatusConsulta(profissionalId, StatusConsulta.PENDENTE);
+        long concluidos = repository.countByProfissionalIdAndStatusConsulta(profissionalId, StatusConsulta.CONCLUIDO);
+        long cancelados = repository.countByProfissionalIdAndStatusConsulta(profissionalId, StatusConsulta.CANCELADO);
+
+        return new ResumoAgendamentosDTO(agendados, pendentes, concluidos, cancelados);
     }
 
     @Transactional
