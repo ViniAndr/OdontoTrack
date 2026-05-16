@@ -3,6 +3,11 @@ package com.odontotrack.api.controller;
 import java.net.URI;
 import java.util.List;
 
+import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.DadosDetalhamentoAgendamentoDTO;
+import com.odontotrack.api.model.Profissional;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,9 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
-import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
-import com.odontotrack.api.dto.AgendamentosDTO.DadosDetalhamentoAgendamentoDTO;
 import com.odontotrack.api.model.StatusConsulta;
 import com.odontotrack.api.service.AgendamentoService;
 
@@ -34,11 +36,21 @@ public class AgendamentoController {
 
     // GET /agendamentos — listar todos (filtro opcional por status: ?status=AGENDADO)
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA') or hasRole('RECEPCIONISTA')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('RECEPCIONISTA')")
     public ResponseEntity<List<DadosDetalhamentoAgendamentoDTO>> listarTodos(
             @RequestParam(required = false) StatusConsulta status) {
         var lista = (status != null ? service.listarPorStatus(status) : service.listarTodos())
                 .stream()
+                .map(DadosDetalhamentoAgendamentoDTO::new)
+                .toList();
+        return ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/meus")
+    @PreAuthorize("hasRole('DENTISTA')")
+    public ResponseEntity<List<DadosDetalhamentoAgendamentoDTO>> listarMinhasConsultas(
+            @AuthenticationPrincipal Profissional usuarioLogado) {
+        var lista = service.listarPorProfissional(usuarioLogado.getId()).stream()
                 .map(DadosDetalhamentoAgendamentoDTO::new)
                 .toList();
         return ResponseEntity.ok(lista);
@@ -64,7 +76,7 @@ public class AgendamentoController {
 
     // GET /agendamentos/profissional/{profissionalId} — listar por profissional
     @GetMapping("/profissional/{profissionalId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA') or hasRole('RECEPCIONISTA')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('RECEPCIONISTA')")
     public ResponseEntity<List<DadosDetalhamentoAgendamentoDTO>> listarPorProfissional(@PathVariable Long profissionalId) {
         var lista = service.listarPorProfissional(profissionalId).stream()
                 .map(DadosDetalhamentoAgendamentoDTO::new)

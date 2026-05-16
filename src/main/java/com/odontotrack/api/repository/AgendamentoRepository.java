@@ -11,9 +11,13 @@ import com.odontotrack.api.model.StatusConsulta;
 @Repository
 public interface AgendamentoRepository extends JpaRepository<AgendamentoConsulta, Long> {
 
-    List<AgendamentoConsulta> findAllByPacienteId(Long pacienteId);
+    // Agora traz o histórico ordenado da consulta mais recente para a mais antiga
+    List<AgendamentoConsulta> findAllByPacienteIdOrderByDataInicioDesc(Long pacienteId);
 
     List<AgendamentoConsulta> findAllByProfissionalId(Long profissionalId);
 
     List<AgendamentoConsulta> findAllByStatusConsulta(StatusConsulta statusConsulta);
+
+    // Conta a quantidade de consultas por status para um dentista específico
+    long countByProfissionalIdAndStatusConsulta(Long profissionalId, StatusConsulta status);
 }
