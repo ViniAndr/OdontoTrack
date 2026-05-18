@@ -79,7 +79,7 @@ public class OdontogramaService {
     public Odontograma atualizar(DadosAtualizacaoOdontogramaDTO dados) {
         var odontograma = repository.getReferenceById(dados.id());
 
-        // Limpa os itens antigos e substitui pelos novos (orphanRemoval cuida da deleção)
+        // Limpa os itens antigos e substitui pelos novos.
         odontograma.getItens().clear();
 
         var novosItens = dados.itens().stream().map(dto -> {
