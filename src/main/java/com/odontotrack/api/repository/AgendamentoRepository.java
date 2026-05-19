@@ -20,4 +20,6 @@ public interface AgendamentoRepository extends JpaRepository<AgendamentoConsulta
 
     // Conta a quantidade de consultas por status para um dentista específico
     long countByProfissionalIdAndStatusConsulta(Long profissionalId, StatusConsulta status);
+
+    long countByPacienteIdAndStatusConsulta(Long pacienteId, StatusConsulta status);
 }

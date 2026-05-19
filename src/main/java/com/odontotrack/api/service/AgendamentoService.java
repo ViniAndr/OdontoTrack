@@ -57,6 +57,15 @@ public class AgendamentoService {
         return new ResumoAgendamentosDTO(agendados, pendentes, concluidos, cancelados);
     }
 
+    public ResumoAgendamentosDTO obterResumoConsultasPaciente(Long pacienteId) {
+        long agendados = repository.countByPacienteIdAndStatusConsulta(pacienteId, StatusConsulta.AGENDADO);
+        long pendentes = repository.countByPacienteIdAndStatusConsulta(pacienteId, StatusConsulta.PENDENTE);
+        long concluidos = repository.countByPacienteIdAndStatusConsulta(pacienteId, StatusConsulta.CONCLUIDO);
+        long cancelados = repository.countByPacienteIdAndStatusConsulta(pacienteId, StatusConsulta.CANCELADO);
+
+        return new ResumoAgendamentosDTO(agendados, pendentes, concluidos, cancelados);
+    }
+
     @Transactional
     public AgendamentoConsulta cadastrar(DadosCadastroAgendamentoDTO dados) {
         if (dados.dataFim().isBefore(dados.dataInicio())) {

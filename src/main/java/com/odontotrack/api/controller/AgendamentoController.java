@@ -6,6 +6,7 @@ import java.util.List;
 import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
 import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
 import com.odontotrack.api.dto.AgendamentosDTO.DadosDetalhamentoAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.ResumoAgendamentosDTO;
 import com.odontotrack.api.model.Profissional;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,21 @@ public class AgendamentoController {
     public ResponseEntity<com.odontotrack.api.dto.AgendamentosDTO.ResumoAgendamentosDTO> obterMeuResumo(
             @AuthenticationPrincipal Profissional usuarioLogado) {
         var resumo = service.obterResumoMinhasConsultas(usuarioLogado.getId());
+        return ResponseEntity.ok(resumo);
+    }
+
+    @GetMapping("/paciente/{pacienteId}/resumo")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('RECEPCIONISTA') or hasRole('DENTISTA')")
+    public ResponseEntity<ResumoAgendamentosDTO> obterResumoPaciente(@PathVariable Long pacienteId) {
+        var resumo = service.obterResumoConsultasPaciente(pacienteId);
+        return ResponseEntity.ok(resumo);
+    }
+
+    @GetMapping("/profissional/{profissionalId}/resumo")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('RECEPCIONISTA')")
+    public ResponseEntity<com.odontotrack.api.dto.AgendamentosDTO.ResumoAgendamentosDTO> obterResumoProfissionalEspecifico(
+            @PathVariable Long profissionalId) {
+        var resumo = service.obterResumoMinhasConsultas(profissionalId);
         return ResponseEntity.ok(resumo);
     }
 
