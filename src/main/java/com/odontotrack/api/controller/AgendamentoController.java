@@ -56,6 +56,14 @@ public class AgendamentoController {
         return ResponseEntity.ok(lista);
     }
 
+    @GetMapping("/meus/resumo")
+    @PreAuthorize("hasRole('DENTISTA')")
+    public ResponseEntity<com.odontotrack.api.dto.AgendamentosDTO.ResumoAgendamentosDTO> obterMeuResumo(
+            @AuthenticationPrincipal Profissional usuarioLogado) {
+        var resumo = service.obterResumoMinhasConsultas(usuarioLogado.getId());
+        return ResponseEntity.ok(resumo);
+    }
+
     // GET /agendamentos/{id} — buscar por ID
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA') or hasRole('RECEPCIONISTA')")
