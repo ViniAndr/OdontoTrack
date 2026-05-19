@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,13 +30,31 @@ public class ProntuarioClinicos {
     @JoinColumn(name = "paciente_id", nullable = false)
     private Paciente paciente;
 
+    @OneToOne
+    @JoinColumn(name = "agendamento_id", nullable = false, unique = true)
+    private AgendamentoConsulta agendamento;
+
+    @OneToOne
+    @JoinColumn(name = "odontogram_id", nullable = true)
+    private Odontograma odontograma;
+
     @Column(columnDefinition = "TEXT")
     private String alergiasHistorico;
-
-    @Column(columnDefinition = "JSON")
-    private String estadoOdontograma;
 
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime dataUltimaAtualizacao;
+
+    @Column(columnDefinition = "TEXT", nullable = true)
+    private String queixaPrincipal;
+    
+    @Column(columnDefinition = "TEXT", nullable = true)
+    private String achadoClinico;
+    
+    @Column(columnDefinition = "TEXT", nullable = true)
+    private String materialUsado;
+    
+    @Column(columnDefinition = "TEXT", nullable = true)
+    private String orientacoesPaciente;
+
 }

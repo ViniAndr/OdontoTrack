@@ -44,11 +44,10 @@ public class ProntuarioController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA')")
     public ResponseEntity<DadosDetalhamentoProntuarioDTO> buscarPorId(@PathVariable Long id) {
-        var prontuario = service.buscarPorId(id);
-        return ResponseEntity.ok(new DadosDetalhamentoProntuarioDTO(prontuario));
+        return ResponseEntity.ok(new DadosDetalhamentoProntuarioDTO(service.buscarPorId(id)));
     }
 
-    // GET /prontuarios/paciente/{pacienteId} — listar prontuários de um paciente
+    // GET /prontuarios/paciente/{pacienteId} — histórico de prontuários do paciente
     @GetMapping("/paciente/{pacienteId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA')")
     public ResponseEntity<List<DadosDetalhamentoProntuarioDTO>> listarPorPaciente(@PathVariable Long pacienteId) {
@@ -58,7 +57,14 @@ public class ProntuarioController {
         return ResponseEntity.ok(lista);
     }
 
-    // POST /prontuarios — cadastrar novo prontuário (201 Created)
+    // GET /prontuarios/agendamento/{agendamentoId} — prontuário de uma consulta específica
+    @GetMapping("/agendamento/{agendamentoId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA')")
+    public ResponseEntity<DadosDetalhamentoProntuarioDTO> buscarPorAgendamento(@PathVariable Long agendamentoId) {
+        return ResponseEntity.ok(new DadosDetalhamentoProntuarioDTO(service.buscarPorAgendamento(agendamentoId)));
+    }
+
+    // POST /prontuarios — cadastrar prontuário (dentista preenche após a consulta)
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA')")
     public ResponseEntity<DadosDetalhamentoProntuarioDTO> cadastrar(
@@ -69,16 +75,15 @@ public class ProntuarioController {
         return ResponseEntity.created(uri).body(new DadosDetalhamentoProntuarioDTO(prontuario));
     }
 
-    // PUT /prontuarios — atualizar prontuário
+    // PUT /prontuarios — atualizar campos clínicos e/ou odontograma
     @PutMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA')")
     public ResponseEntity<DadosDetalhamentoProntuarioDTO> atualizar(
             @RequestBody @Valid DadosAtualizacaoProntuarioDTO dados) {
-        var prontuario = service.atualizar(dados);
-        return ResponseEntity.ok(new DadosDetalhamentoProntuarioDTO(prontuario));
+        return ResponseEntity.ok(new DadosDetalhamentoProntuarioDTO(service.atualizar(dados)));
     }
 
-    // DELETE /prontuarios/{id} — excluir prontuário (hard delete, 204 No Content)
+    // DELETE /prontuarios/{id} — exclusão (apenas ADMIN)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
