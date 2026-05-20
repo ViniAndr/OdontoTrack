@@ -1,10 +1,5 @@
 package com.odontotrack.api.dto.ProntuariosDTO;
 
-import java.util.List;
-
-import com.odontotrack.api.dto.OdontogramaDTO.ItemOdontogramaDTO;
-
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -16,21 +11,10 @@ import jakarta.validation.constraints.NotNull;
  * são substituídos integralmente.
  */
 public record DadosAtualizacaoProntuarioDTO(
-
         @NotNull Long id,
-
         String queixaPrincipal,
-
         String achadoClinico,
-
         String material,
-
         String orientacoesPaciente,
-
-        String alergiasHistorico,
-
-        // Lista completa de itens do odontograma para substituição.
-        // Se nulo, o odontograma não é alterado.
-        @Valid List<ItemOdontogramaDTO> itensOdontograma
-
+        String alergiasHistorico
 ) {}

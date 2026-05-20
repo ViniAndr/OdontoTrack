@@ -1,8 +1,8 @@
 package com.odontotrack.api.dto.OdontogramaDTO;
 
-import com.odontotrack.api.model.Odontograma;
-
 import java.util.List;
+
+import com.odontotrack.api.model.Odontograma;
 
 public record DadosDetalhamentoOdontogramaDTO(
         Long id,

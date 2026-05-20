@@ -8,12 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.odontotrack.api.dto.ProntuariosDTO.DadosAtualizacaoProntuarioDTO;
 import com.odontotrack.api.dto.ProntuariosDTO.DadosCadastroProntuarioDTO;
-import com.odontotrack.api.model.Odontograma;
-import com.odontotrack.api.model.OdontogramaItem;
 import com.odontotrack.api.model.ProntuarioClinicos;
+import com.odontotrack.api.model.Odontograma; // Import necessário
+import com.odontotrack.api.model.OdontogramaItem; // Import necessário
 import com.odontotrack.api.repository.AgendamentoRepository;
-import com.odontotrack.api.repository.OdontogramaRepository;
 import com.odontotrack.api.repository.ProntuarioRepository;
+import com.odontotrack.api.repository.OdontogramaRepository; // Import necessário
 
 @Service
 public class ProntuarioService {
@@ -53,20 +53,8 @@ public class ProntuarioService {
     // Criação
     // ─────────────────────────────────────────────
 
-    /**
-     * Cria um prontuário clínico a partir de um agendamento.
-     *
-     * Regras:
-     * - Um agendamento só pode ter um prontuário (1:1).
-     * - Paciente e profissional são derivados do agendamento — não precisam ser
-     *   enviados pelo frontend.
-     * - Se itensOdontograma for enviado, o odontograma é criado e vinculado
-     *   automaticamente na mesma transação.
-     */
     @Transactional
     public ProntuarioClinicos cadastrar(DadosCadastroProntuarioDTO dados) {
-
-        // Garante unicidade: um agendamento → um prontuário
         if (repository.existsByAgendamentoId(dados.agendamentoId())) {
             throw new RuntimeException("Já existe um prontuário cadastrado para este agendamento.");
         }
@@ -74,7 +62,6 @@ public class ProntuarioService {
         var agendamento = agendamentoRepository.findById(dados.agendamentoId())
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado."));
 
-        // Paciente derivado do agendamento
         var paciente = agendamento.getPaciente();
         if (!paciente.getAtivo()) {
             throw new RuntimeException("Paciente inativo.");
@@ -89,10 +76,7 @@ public class ProntuarioService {
         prontuario.setOrientacoesPaciente(dados.orientacoesPaciente());
         prontuario.setAlergiasHistorico(dados.alergiasHistorico());
 
-        // Cria e vincula odontograma se itens forem enviados
         if (dados.itensOdontograma() != null && !dados.itensOdontograma().isEmpty()) {
-
-            // Valida que já não existe odontograma para este agendamento
             if (odontogramaRepository.existsByAgendamentoId(dados.agendamentoId())) {
                 throw new RuntimeException("Já existe um odontograma para este agendamento.");
             }
@@ -110,7 +94,8 @@ public class ProntuarioService {
             }).toList();
 
             odontograma.getItens().addAll(itens);
-
+            
+            // Força a persistência explicitamente para evitar problemas de dependência transiente
             var odontogramaSalvo = odontogramaRepository.save(odontograma);
             prontuario.setOdontograma(odontogramaSalvo);
         }
@@ -122,17 +107,10 @@ public class ProntuarioService {
     // Atualização
     // ─────────────────────────────────────────────
 
-    /**
-     * Atualiza os campos clínicos do prontuário.
-     *
-     * Aplica apenas os campos não-nulos (semântica de PATCH via PUT).
-     * Se itensOdontograma for enviado, os itens do odontograma vinculado
-     * são substituídos integralmente; se ainda não existir odontograma,
-     * um novo é criado.
-     */
     @Transactional
     public ProntuarioClinicos atualizar(DadosAtualizacaoProntuarioDTO dados) {
-        var prontuario = repository.getReferenceById(dados.id());
+        var prontuario = repository.findById(dados.id())
+                .orElseThrow(() -> new RuntimeException("Prontuário não encontrado."));
 
         if (dados.queixaPrincipal() != null)    prontuario.setQueixaPrincipal(dados.queixaPrincipal());
         if (dados.achadoClinico() != null)       prontuario.setAchadoClinico(dados.achadoClinico());
@@ -140,35 +118,34 @@ public class ProntuarioService {
         if (dados.orientacoesPaciente() != null) prontuario.setOrientacoesPaciente(dados.orientacoesPaciente());
         if (dados.alergiasHistorico() != null)   prontuario.setAlergiasHistorico(dados.alergiasHistorico());
 
-        // Atualiza odontograma se itens forem enviados
         if (dados.itensOdontograma() != null && !dados.itensOdontograma().isEmpty()) {
-
             Odontograma odontograma;
 
             if (prontuario.getOdontograma() != null) {
-                // Substitui os itens do odontograma existente
                 odontograma = prontuario.getOdontograma();
                 odontograma.getItens().clear();
             } else {
-                // Cria novo odontograma e vincula ao prontuário
                 odontograma = new Odontograma();
                 odontograma.setPaciente(prontuario.getPaciente());
                 odontograma.setAgendamento(prontuario.getAgendamento());
+                // Importante: salva o novo odontograma antes de injetar na entidade pai se não houver Cascade estruturado
+                odontograma = odontogramaRepository.save(odontograma);
                 prontuario.setOdontograma(odontograma);
             }
 
+            // Variável final para uso dentro do escopo do lambda lambda
+            final Odontograma odontogramaRef = odontograma;
             var novosItens = dados.itensOdontograma().stream().map(dto -> {
                 var item = new OdontogramaItem();
                 item.setDente(dto.dente());
                 item.setStatusDente(dto.statusDente());
-                item.setOdontograma(odontograma);
+                item.setOdontograma(odontogramaRef);
                 return item;
             }).toList();
 
             odontograma.getItens().addAll(novosItens);
         }
 
-        // @Transactional persiste automaticamente via dirty-checking
         return prontuario;
     }
 
