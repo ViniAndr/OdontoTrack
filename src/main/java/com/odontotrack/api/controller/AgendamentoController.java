@@ -96,12 +96,11 @@ public class AgendamentoController {
     }
 
     // PUT /agendamentos — atualizar agendamento
-    @PutMapping("/{id}")
+    @PutMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA') or hasRole('RECEPCIONISTA')")
     public ResponseEntity<DadosDetalhamentoAgendamentoDTO> atualizar(
-            @PathVariable Long id,
             @RequestBody @Valid DadosAtualizacaoAgendamentoDTO dados) {
-        var agendamento = service.atualizar(id, dados);
+        var agendamento = service.atualizar(dados);
         return ResponseEntity.ok(new DadosDetalhamentoAgendamentoDTO(agendamento));
     }
 

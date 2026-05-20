@@ -82,8 +82,8 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public AgendamentoConsulta atualizar(Long id, DadosAtualizacaoAgendamentoDTO dados) {
-        var agendamento = repository.findById(id)
+    public AgendamentoConsulta atualizar(DadosAtualizacaoAgendamentoDTO dados) {
+        var agendamento = repository.findById(dados.id())
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado."));
  
         // FIX: aplicar os novos valores ANTES de validar.
