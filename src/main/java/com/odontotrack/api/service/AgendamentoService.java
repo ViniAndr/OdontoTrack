@@ -82,10 +82,14 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public AgendamentoConsulta atualizar(DadosAtualizacaoAgendamentoDTO dados) {
-        var agendamento = repository.getReferenceById(dados.id());
+    public AgendamentoConsulta atualizar(Long id, DadosAtualizacaoAgendamentoDTO dados) {
+        var agendamento = repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Agendamento não encontrado."));
 
-        if (dados.dataInicio() != null) agendamento.setDataInicio(dados.dataInicio());
+        if (agendamento.getDataInicio() != null && agendamento.getDataFim() != null
+                && agendamento.getDataFim().isBefore(agendamento.getDataInicio())) {
+            throw new RuntimeException("A data de fim não pode ser anterior à data de início.");
+        }
         if (dados.dataFim() != null) agendamento.setDataFim(dados.dataFim());
         if (dados.statusConsulta() != null) agendamento.setStatusConsulta(dados.statusConsulta());
 

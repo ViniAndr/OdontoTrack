@@ -1,6 +1,10 @@
 package com.odontotrack.api.dto.ProntuariosDTO;
 
+import com.odontotrack.api.dto.OdontogramaDTO.ItemOdontogramaDTO;
+
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 /**
  * DTO de atualização do prontuário clínico.
@@ -16,5 +20,6 @@ public record DadosAtualizacaoProntuarioDTO(
         String achadoClinico,
         String material,
         String orientacoesPaciente,
-        String alergiasHistorico
+        String alergiasHistorico,
+        List<ItemOdontogramaDTO> itensOdontograma
 ) {}

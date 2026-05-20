@@ -55,6 +55,15 @@ public class ProfissionalController {
         return ResponseEntity.ok(new TokenJWTDTO(tokenJWT));
     }
 
+    // Adicionar junto dos outros @GetMapping
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA') or hasRole('RECEPCIONISTA')")
+    public ResponseEntity<DadosDetalhamentoProfissionalDTO> buscarPorId(@PathVariable Long id) {
+        var profissional = service.buscarPorId(id);
+        return ResponseEntity.ok(new DadosDetalhamentoProfissionalDTO(profissional));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')") // SÓ ENTRA SE TIVER O PERFIL 'ROLE_ADMIN'
     public ResponseEntity<DadosDetalhamentoProfissionalDTO> cadastrar(@RequestBody @Valid DadosCadastroProfissionalDTO dados) {

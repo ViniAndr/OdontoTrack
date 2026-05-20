@@ -1,7 +1,10 @@
 package com.odontotrack.api.dto.ProntuariosDTO;
 
+import com.odontotrack.api.dto.OdontogramaDTO.ItemOdontogramaDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 
 /**
@@ -21,5 +24,6 @@ public record DadosCadastroProntuarioDTO(
         @NotBlank String achadoClinico,
         String alergiasHistorico,
         String orientacoesPaciente,
-        String material
+        String material,
+        List<ItemOdontogramaDTO> itensOdontograma
 ) {}

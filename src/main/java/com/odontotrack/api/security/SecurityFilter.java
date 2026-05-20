@@ -30,7 +30,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if (token == null && !request.getRequestURI().contains("/login")) {
             // Escrevemos a mensagem de erro diretamente na resposta do servidor!
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // Status 403
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Status 401
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write("Acesso bloqueado: Nenhum Token JWT foi enviado no cabeçalho.");
             return; // Corta a requisição aqui, nem tenta continuar!
@@ -59,5 +59,10 @@ public class SecurityFilter extends OncePerRequestFilter {
         var authHeader = request.getHeader("Authorization");
         if (authHeader == null) return null;
         return authHeader.replace("Bearer ", "");
+    }
+
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return true; // Deixa o Spring Boot tratar erros 404/500 normalmente, sem interceptar
     }
 }

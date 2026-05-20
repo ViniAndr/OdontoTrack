@@ -45,6 +45,11 @@ public class ProfissionalService {
         return repository.save(profissional);
     }
 
+    public Profissional buscarPorId(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Profissional não encontrado."));
+    }
+
     @Transactional
     public Profissional atualizar(DadosAtualizacaoProfissionalDTO dados) {
         var profissional = repository.getReferenceById(dados.id());
