@@ -3,14 +3,10 @@ package com.odontotrack.api.controller;
 import java.net.URI;
 import java.util.List;
 
-import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
-import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
-import com.odontotrack.api.dto.AgendamentosDTO.DadosDetalhamentoAgendamentoDTO;
-import com.odontotrack.api.model.Profissional;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.DadosDetalhamentoAgendamentoDTO;
+import com.odontotrack.api.model.Profissional;
 import com.odontotrack.api.model.StatusConsulta;
 import com.odontotrack.api.service.AgendamentoService;
 
@@ -96,7 +96,7 @@ public class AgendamentoController {
     }
 
     // PUT /agendamentos — atualizar agendamento
-    @PutMapping
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('DENTISTA') or hasRole('RECEPCIONISTA')")
     public ResponseEntity<DadosDetalhamentoAgendamentoDTO> atualizar(
             @PathVariable Long id,

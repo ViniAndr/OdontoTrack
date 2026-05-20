@@ -2,13 +2,13 @@ package com.odontotrack.api.service;
 
 import java.util.List;
 
-import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
-import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
-import com.odontotrack.api.dto.AgendamentosDTO.ResumoAgendamentosDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.odontotrack.api.dto.AgendamentosDTO.DadosAtualizacaoAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.DadosCadastroAgendamentoDTO;
+import com.odontotrack.api.dto.AgendamentosDTO.ResumoAgendamentosDTO;
 import com.odontotrack.api.model.AgendamentoConsulta;
 import com.odontotrack.api.model.StatusConsulta;
 import com.odontotrack.api.repository.AgendamentoRepository;
@@ -84,15 +84,21 @@ public class AgendamentoService {
     @Transactional
     public AgendamentoConsulta atualizar(Long id, DadosAtualizacaoAgendamentoDTO dados) {
         var agendamento = repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Agendamento não encontrado."));
-
+                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado."));
+ 
+        // FIX: aplicar os novos valores ANTES de validar.
+        // O código anterior validava os dados antigos do banco, nunca os recém-enviados.
+        // Também faltava aplicar dados.dataInicio().
+        if (dados.dataInicio() != null)    agendamento.setDataInicio(dados.dataInicio());
+        if (dados.dataFim() != null)       agendamento.setDataFim(dados.dataFim());
+        if (dados.statusConsulta() != null) agendamento.setStatusConsulta(dados.statusConsulta());
+ 
+        // Validação ocorre após aplicar os novos valores
         if (agendamento.getDataInicio() != null && agendamento.getDataFim() != null
                 && agendamento.getDataFim().isBefore(agendamento.getDataInicio())) {
             throw new RuntimeException("A data de fim não pode ser anterior à data de início.");
         }
-        if (dados.dataFim() != null) agendamento.setDataFim(dados.dataFim());
-        if (dados.statusConsulta() != null) agendamento.setStatusConsulta(dados.statusConsulta());
-
+ 
         return agendamento;
     }
 
